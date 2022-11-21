@@ -1,28 +1,42 @@
 import PySimpleGUI as sg
 
+# Elements that are centered
+column = [
+    [sg.Listbox( size=(25, 15), values=[],key="LIST", select_mode= sg.LISTBOX_SELECT_MODE_MULTIPLE, enable_events=True, highlight_background_color='Purple')],
+    [sg.Text("Your choice:  ")],
+    [sg.Listbox(size=(25, 10), values=[], key="ACTIVE" )],
+    [sg.Text("For active countries press"), sg.Button("SHOW", button_color='White', mouseover_colors=('White','Purple'))]
+]
 layout = [
-    [sg.Text("Hello")],
-    [sg.Button("Close")],
-    [sg.Text("For active countries press"), sg.Button("Show")],
-    [sg.In(size=(25, 1), enable_events=True, key="xd")],
-    [sg.Button("Read")],
-    [sg.Text(size=(25, 3), key="c")],
-    [sg.Listbox(size=(25, 3), values=[], enable_events=True, key="list")]]
+    [sg.Text("Add new country: "), sg.In(size=(30, 1), enable_events=True, key="INPUT"), sg.Button("READ", button_color='White', mouseover_colors =('White','Purple'))],
+    [sg.Column(column, justification='center')],
+    [sg.Button("CLOSE", button_color='White', mouseover_colors =('White','Purple'))]
+]
 
 # Create the window
-window = sg.Window("Demo", layout)
+sg.theme_global('LightPurple')
+window = sg.Window("Ranking", layout, resizable=True, font= 'Any` 15')
+
+# List with Country data
 tab = []
-# Create an event loop
+activeCountry = []
+
 while True:
     event, values = window.read()
-    # End program if user closes window or
-    # presses the OK button
-    if event == "Read":
-        tab.append(values["xd"])
-        print(values["xd"])
-        window["c"].update(tab)
-        window["list"].update(tab)
-    if event == "Close" or event == sg.WIN_CLOSED:
+    # Add new Country
+    if event == "READ":
+        tab.append(values["INPUT"])
+        window["LIST"].update(tab)
+    # Close window
+    if event == "CLOSE" or event == sg.WIN_CLOSED:
         break
+    # Update list with choosen country
+    if event == "LIST":
+        activeCountry = values['LIST']
+        window['ACTIVE'].update(activeCountry)
+    # Calculate and show ranking
+    if event == "SHOW":
+        break
+
 
 window.close()
