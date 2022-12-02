@@ -1,14 +1,20 @@
 import PySimpleGUI as sg
-
+from ranking_maker import calculate_ranking
 # Elements that are centered
 column = [
-    [sg.Listbox( size=(25, 15), values=[],key="LIST", select_mode= sg.LISTBOX_SELECT_MODE_MULTIPLE, enable_events=True, highlight_background_color='Purple')],
-    [sg.Text("Your choice:  ")],
-    [sg.Listbox(size=(25, 10), values=[], key="ACTIVE" )],
+    [sg.Listbox( size=(25, 13), values=[
+        'Spain', 'Poland', 'Germany', 
+        'Italy', 'Switzerland', 'Norway', 
+        'Greece','France','Russia',
+        'England',
+        'Ireland','Turkey','Belarus'
+        ],key="LIST", select_mode= sg.LISTBOX_SELECT_MODE_MULTIPLE, enable_events=True, highlight_background_color='Purple')],
+    [sg.Text("Ranking:  ")],
+    [sg.Listbox(size=(25, 13), values=[], key="RANKING",  no_scrollbar=True )],
     [sg.Text("For active countries press"), sg.Button("SHOW", button_color='White', mouseover_colors=('White','Purple'))]
 ]
 layout = [
-    [sg.Text("Add new country: "), sg.In(size=(30, 1), enable_events=True, key="INPUT"), sg.Button("READ", button_color='White', mouseover_colors =('White','Purple'))],
+    # [sg.Text("Add new country: "), sg.In(size=(30, 1), enable_events=True, key="INPUT"), sg.Button("READ", button_color='White', mouseover_colors =('White','Purple'))],
     [sg.Column(column, justification='center')],
     [sg.Button("CLOSE", button_color='White', mouseover_colors =('White','Purple'))]
 ]
@@ -30,13 +36,11 @@ while True:
     # Close window
     if event == "CLOSE" or event == sg.WIN_CLOSED:
         break
-    # Update list with choosen country
-    if event == "LIST":
-        activeCountry = values['LIST']
-        window['ACTIVE'].update(activeCountry)
     # Calculate and show ranking
     if event == "SHOW":
-        break
-
+        activeCountry = values['LIST']
+        print(activeCountry)
+        ranking = calculate_ranking(activeCountry)
+        window['RANKING'].update(ranking)
 
 window.close()
