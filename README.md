@@ -7,3 +7,5 @@ Projekt realizowany razem z [Jakub Domogała](https://github.com/Jakub-Domogala)
 ### Uruchomienie
 1. Należy sklonować powyższe repozytorium
 2. Z poziomu katalogu ```Ranking``` wywołać komendę ```python3 main.py```
+
+[Dokumentacja](https://github.com/MaOlszewska/Ranking/blob/master/MiAPD-dokumentacja.pdf)
