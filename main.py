@@ -106,16 +106,10 @@ while True:
             print("You need to add at least one Country")
             sg.Popup('You need to add at least one Country', keep_on_top=True)
             continue
-        # print(activeCountry)
-        # print(priority)
         w = [0, 0]
         ranking_evm, w[0]= calculate_ranking_EVM(prio, activeCountry)
-        # print(ranking)
         window['RANKING_EVM'].update(ranking_evm)
         ranking_gmm, w[1]= calculate_ranking_GMM(prio, activeCountry)
-        # print(ranking)
-        # print(w[0])
-        # print(w[1])
         window['RANKING_GMM'].update(ranking_gmm)
 
 window.close()

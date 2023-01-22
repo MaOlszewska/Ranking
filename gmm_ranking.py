@@ -24,7 +24,6 @@ def remap_from_1_9_17_to_1over9_1_9(value):
 
 
 def make_importance_matrix(tab):
-    # print(tab)
     size = 4
     cnt = 0
     matrix = [[None for _ in range(size)] for _ in range(size)]
@@ -34,20 +33,16 @@ def make_importance_matrix(tab):
             matrix[i][j] = remap_from_1_9_17_to_1over9_1_9(tab[cnt])
             matrix[j][i] = 1/matrix[i][j]
             cnt += 1
-    # for row in matrix:
-    #     print(row)
     return matrix
 
 def calculate_importance(matrix):
     n = len(matrix)
-    # matrix = [[i/j for i in tab] for j in tab]
     for i, x in enumerate(matrix):
         s = 0
         for y in x:
             s += y
         for j in range(n):
             matrix[i][j] /= s*n
-    # print(matrix)
     prio_sums = [0] * 4
     for i in range(n):
         for j in range(n):
@@ -96,10 +91,6 @@ def weights_of_attributes(matrix):
 # Function mapping our range of values from (0, max_val) to (1, 9)
 def map_values_to_1_9_scale(tab, vmax, proportional = True):
     n = len(tab)
-    # # scale down to 0...
-    # vmin = min(tab)
-    # for i in range(n):
-    #     tab[i] = tab[i] / vmin - 1
 
     # scale up to 1...9
     for i in range(n):
@@ -157,10 +148,6 @@ def calculate_ranking_GMM(prio, country_names_list):
             for j in range(n):
                 result[i][j] = np.prod([list_mtx[e][i][j] for e in range(am)])**(1/am)
         return result
-    # print()
-    # print(prio)
-    # print(country_names_list)
-    # print()
     # Read all countries from .csv
     with open("countries.csv") as file:
         csvreader = csv.reader(file)
@@ -196,9 +183,6 @@ def calculate_ranking_GMM(prio, country_names_list):
     for l in prio:
         mtx_list.append( make_importance_matrix(l) )
     imp_mtx = mean_from_experts(mtx_list)
-    # print(imp_mtx)
-    # for row in imp_mtx:
-    #     print(row)
     # ==============================================================================
 
     def transpoze_mtx(mtx):
@@ -228,7 +212,6 @@ def calculate_ranking_GMM(prio, country_names_list):
     # print(attributes_weights[1], "Average lifetime")
     # print(attributes_weights[2], "PKB")
     # print(attributes_weights[3], "Happiness")
-    # print(attributes_weights)
 
 
 
@@ -247,10 +230,3 @@ def calculate_ranking_GMM(prio, country_names_list):
         # final.append([i+1, row[0]])
         final.append(str(i+1) + ". " + row[0]) # format recieved by gui
     return final, weights
-
-# prio = [1,1,17,1,17,17]
-# prio = [12, 12, 11, 14, 13, 10]
-# imp_mtx = make_importance_matrix(prio)
-# attributes_weights = calculate_importance(imp_mtx)
-# attributes_weights = swap_em(attributes_weights)
-# print(attributes_weights, sum(attributes_weights))

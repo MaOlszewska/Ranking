@@ -156,10 +156,6 @@ def calculate_ranking_EVM(prio, country_names_list):
                 result[i][j] = np.prod([list_mtx[e][i][j] for e in range(am)])**(1/am)
         return result
 
-    # print()
-    # print(prio)
-    # print(country_names_list)
-    # print()
     # Read all countries from .csv
     with open("countries.csv") as file:
         csvreader = csv.reader(file)
@@ -195,23 +191,12 @@ def calculate_ranking_EVM(prio, country_names_list):
     for l in prio:
         mtx_list.append( make_importance_matrix(l) )
     imp_mtx = mean_from_experts(mtx_list)
-    # print()
-    # print()
-    # print()
-    # print()
-    # print()
-    # print("imp_mtx")
-    # for row in imp_mtx:
-    #     print(row)
     attributes_weights = calculate_importance(imp_mtx)
-    # print("atr wei")
-    # print(attributes_weights)
     attributes_weights = swap_em(attributes_weights)
     # print(attributes_weights[0], "Population")
     # print(attributes_weights[1], "Average lifetime")
     # print(attributes_weights[2], "PKB")
     # print(attributes_weights[3], "Happiness")
-    # print(attributes_weights)
 
 
 
@@ -227,13 +212,5 @@ def calculate_ranking_EVM(prio, country_names_list):
     # Make output list for GUI
     final = []
     for i, row in enumerate(ranking):
-        # final.append([i+1, row[0]])
         final.append(str(i+1) + ". " + row[0]) # format recieved by gui
     return final, weights
-
-# prio = [1,1,17,1,17,17]
-# prio = [12, 12, 11, 14, 13, 10]
-# imp_mtx = make_importance_matrix(prio)
-# attributes_weights = calculate_importance(imp_mtx)
-# attributes_weights = swap_em(attributes_weights)
-# print(attributes_weights, sum(attributes_weights))
