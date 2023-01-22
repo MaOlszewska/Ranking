@@ -1,5 +1,5 @@
 import csv
-
+import numpy as np
 #           pop	    avg	    pkb	    happ	sums
 # pop	    1	    4	    4	    3	    12
 # avg	    0,25	1	    6	    5	    12,25
@@ -24,6 +24,7 @@ def remap_from_1_9_17_to_1over9_1_9(value):
 
 
 def make_importance_matrix(tab):
+    # print(tab)
     size = 4
     cnt = 0
     matrix = [[None for _ in range(size)] for _ in range(size)]
@@ -33,8 +34,8 @@ def make_importance_matrix(tab):
             matrix[i][j] = remap_from_1_9_17_to_1over9_1_9(tab[cnt])
             matrix[j][i] = 1/matrix[i][j]
             cnt += 1
-    for row in matrix:
-        print(row)
+    # for row in matrix:
+    #     print(row)
     return matrix
 
 def calculate_importance(matrix):
@@ -137,8 +138,29 @@ def swap_em(xd):
     xd[0], xd[1], xd[2], xd[3]= xd[1], xd[3], xd[0], xd[2]
     return xd
 
+
+
 # Main driver function
-def calculate_ranking(prio, country_names_list):
+def calculate_ranking_GMM(prio, country_names_list):
+    # In next line of code we:
+        # map strings to int
+        # rescale 1-10 scale to 1-17 scale
+    # Might look more complicated that it should
+    prio = np.ndarray.tolist(np.multiply((np.array([[int(prio[j][i]) for i in range(len(prio[0]))] for j in range(len(prio))])), 16/10) + 1)
+    def mean_from_experts(list_mtx):
+        if len(list_mtx) == 1:
+            return list_mtx[0]
+        n = len(list_mtx[0])
+        am = len(list_mtx)
+        result = [[None for _ in range(n)] for _ in range(n)]
+        for i in range(n):
+            for j in range(n):
+                result[i][j] = np.prod([list_mtx[e][i][j] for e in range(am)])**(1/am)
+        return result
+    # print()
+    # print(prio)
+    # print(country_names_list)
+    # print()
     # Read all countries from .csv
     with open("countries.csv") as file:
         csvreader = csv.reader(file)
@@ -170,14 +192,43 @@ def calculate_ranking(prio, country_names_list):
         mapped_pbk
     ]
     # Calc importance matrix
-    imp_mtx = make_importance_matrix(prio)
-    attributes_weights = calculate_importance(imp_mtx)
+    mtx_list = []
+    for l in prio:
+        mtx_list.append( make_importance_matrix(l) )
+    imp_mtx = mean_from_experts(mtx_list)
+    # print(imp_mtx)
+    # for row in imp_mtx:
+    #     print(row)
+    # ==============================================================================
+
+    def transpoze_mtx(mtx):
+        return [[mtx[i][j] for i in range(len(mtx))] for j in range(len(mtx))]
+
+
+    def geometric_mean(mtx):
+        n = len(mtx)
+        roots = []
+        for row_id in range(n):
+            val = 1
+            for i in range(n):
+                val *= mtx[row_id][i]
+            roots.append(val**(1/n))
+        s = sum(roots)
+        return [roots[i]/s for i in range(n)]
+
+
+
+
+
+    
+    # ==============================================================================
+    attributes_weights = geometric_mean(transpoze_mtx( imp_mtx))
     attributes_weights = swap_em(attributes_weights)
-    print(attributes_weights[0], "Population")
-    print(attributes_weights[1], "Average lifetime")
-    print(attributes_weights[2], "PKB")
-    print(attributes_weights[3], "Happiness")
-    print(attributes_weights)
+    # print(attributes_weights[0], "Population")
+    # print(attributes_weights[1], "Average lifetime")
+    # print(attributes_weights[2], "PKB")
+    # print(attributes_weights[3], "Happiness")
+    # print(attributes_weights)
 
 
 
@@ -195,7 +246,7 @@ def calculate_ranking(prio, country_names_list):
     for i, row in enumerate(ranking):
         # final.append([i+1, row[0]])
         final.append(str(i+1) + ". " + row[0]) # format recieved by gui
-    return final
+    return final, weights
 
 # prio = [1,1,17,1,17,17]
 # prio = [12, 12, 11, 14, 13, 10]
