@@ -1,5 +1,7 @@
 import csv
 import numpy as np
+
+
 #           pop	    avg	    pkb	    happ	sums
 # pop	    1	    4	    4	    3	    12
 # avg	    0,25	1	    6	    5	    12,25
@@ -29,11 +31,12 @@ def make_importance_matrix(tab):
     matrix = [[None for _ in range(size)] for _ in range(size)]
     for i in range(0, size):
         matrix[i][i] = 1
-        for j in range(i+1, size):
+        for j in range(i + 1, size):
             matrix[i][j] = remap_from_1_9_17_to_1over9_1_9(tab[cnt])
-            matrix[j][i] = 1/matrix[i][j]
+            matrix[j][i] = 1 / matrix[i][j]
             cnt += 1
     return matrix
+
 
 def calculate_importance(matrix):
     n = len(matrix)
@@ -42,20 +45,23 @@ def calculate_importance(matrix):
         for y in x:
             s += y
         for j in range(n):
-            matrix[i][j] /= s*n
+            matrix[i][j] /= s * n
     prio_sums = [0] * 4
     for i in range(n):
         for j in range(n):
             prio_sums[i] += matrix[j][i]
-    
+
     return prio_sums
+
+
 # Importance of attributes calculated from matrix
 attributes_weights = [
     0.140,
     0.434,
     0.086,
     0.340
-    ]
+]
+
 
 # Function that takes mapped attributes and creates comparison matrix
 def make_comparison_matrix(tab):
@@ -65,6 +71,7 @@ def make_comparison_matrix(tab):
         for j, y in enumerate(tab):
             matrix[i][j] = x / y
     return matrix
+
 
 # Function that takes matrix and normalizes it (sum(matrix[row]) == 1)
 def normalize_rows_in_matrix_EVN(matrix):
@@ -78,6 +85,7 @@ def normalize_rows_in_matrix_EVN(matrix):
         for i in range(n):
             matrix[j][i] /= sums[i]
 
+
 # Function that divides all values by size of matrix
 def weights_of_attributes(matrix):
     n = len(matrix)
@@ -88,8 +96,9 @@ def weights_of_attributes(matrix):
         sums[j] = round(sums[j] / n, 2)
     return sums
 
+
 # Function mapping our range of values from (0, max_val) to (1, 9)
-def map_values_to_1_9_scale(tab, vmax, proportional = True):
+def map_values_to_1_9_scale(tab, vmax, proportional=True):
     n = len(tab)
 
     # scale up to 1...9
@@ -102,14 +111,17 @@ def map_values_to_1_9_scale(tab, vmax, proportional = True):
             tab[i] = 10 - tab[i]
     return tab
 
+
 # Function that takes all mapped attributes for all countries and drives all other calculations for it
-def calc_weights_EVM(mapped_all):
+def calc_weights(mapped_all):
     weights = []
-    for mapped in mapped_all: # for life happiness population and pkb EVM
-        comp_matrix = make_comparison_matrix(mapped) # make matrixes for each attr
-        normalize_rows_in_matrix_EVN(comp_matrix) # scale rows to make sum of each equal 1
-        weights.append(weights_of_attributes(comp_matrix)) # divide all values by number of rows to make whole matrix sum equal 1
-    return weights # return all weights ( 2D )
+    for mapped in mapped_all:  # for life happiness population and pkb EVM
+        comp_matrix = make_comparison_matrix(mapped)  # make matrixes for each attr
+        normalize_rows_in_matrix_EVN(comp_matrix)  # scale rows to make sum of each equal 1
+        weights.append(
+            weights_of_attributes(comp_matrix))  # divide all values by number of rows to make whole matrix sum equal 1
+    return weights  # return all weights ( 2D )
+
 
 # Function that multiplies our result weights with our set importance of each attribute. Returning single ranking value for each country
 def multiply_by_attr_weights(weights, attr_weights):
@@ -125,19 +137,36 @@ def multiply_by_attr_weights(weights, attr_weights):
             pre_ranking[j] += weights[i][j]
     return pre_ranking
 
+
 def swap_em(xd):
-    xd[0], xd[1], xd[2], xd[3]= xd[1], xd[3], xd[0], xd[2]
+    xd[0], xd[1], xd[2], xd[3] = xd[1], xd[3], xd[0], xd[2]
     return xd
 
+
+def geometric_mean(mtx):
+    n = len(mtx)
+    print(mtx)
+    roots = []
+    for row_id in range(n):
+        val = 1
+        for i in range(n):
+            val *= mtx[row_id][i]
+        roots.append(val ** (1 / n))
+    s = sum(roots)
+    print([roots[i] / s for i in range(n)])
+    return [roots[i] / s for i in range(n)]
 
 
 # Main driver function
 def calculate_ranking_GMM(prio, country_names_list):
     # In next line of code we:
-        # map strings to int
-        # rescale 1-10 scale to 1-17 scale
+    # map strings to int
+    # rescale 1-10 scale to 1-17 scale
     # Might look more complicated that it should
-    prio = np.ndarray.tolist(np.multiply((np.array([[int(prio[j][i]) for i in range(len(prio[0]))] for j in range(len(prio))])), 16/10) + 1)
+    prio = np.ndarray.tolist(
+        np.multiply((np.array([[int(prio[j][i]) for i in range(len(prio[0]))] for j in range(len(prio))])),
+                    16 / 10) + 1)
+
     def mean_from_experts(list_mtx):
         if len(list_mtx) == 1:
             return list_mtx[0]
@@ -146,8 +175,9 @@ def calculate_ranking_GMM(prio, country_names_list):
         result = [[None for _ in range(n)] for _ in range(n)]
         for i in range(n):
             for j in range(n):
-                result[i][j] = np.prod([list_mtx[e][i][j] for e in range(am)])**(1/am)
+                result[i][j] = np.prod([list_mtx[e][i][j] for e in range(am)]) ** (1 / am)
         return result
+
     # Read all countries from .csv
     with open("countries.csv") as file:
         csvreader = csv.reader(file)
@@ -161,16 +191,16 @@ def calculate_ranking_GMM(prio, country_names_list):
                 countries_dict[row[0]] = row[1:]
 
     # Make values lists of each attribute
-    avg_life =      [float(x[0]) for x in countries_dict.values()]
-    happiness =     [float(x[1]) for x in countries_dict.values()]
-    population =    [float(x[2]) for x in countries_dict.values()]
-    pbk =           [float(x[3]) for x in countries_dict.values()]
+    avg_life = [float(x[0]) for x in countries_dict.values()]
+    happiness = [float(x[1]) for x in countries_dict.values()]
+    population = [float(x[2]) for x in countries_dict.values()]
+    pbk = [float(x[3]) for x in countries_dict.values()]
 
     # Map all the lists to 1-9 scale
-    mapped_avg_life =   map_values_to_1_9_scale(avg_life, 100)
-    mapped_happiness =  map_values_to_1_9_scale(happiness, 10)
-    mapped_population = map_values_to_1_9_scale(population, 300, False) # because smaller is better here
-    mapped_pbk =        map_values_to_1_9_scale(pbk, 100000)
+    mapped_avg_life = map_values_to_1_9_scale(avg_life, 100)
+    mapped_happiness = map_values_to_1_9_scale(happiness, 10)
+    mapped_population = map_values_to_1_9_scale(population, 300, False)  # because smaller is better here
+    mapped_pbk = map_values_to_1_9_scale(pbk, 100000)
 
     mapped_all = [
         mapped_avg_life,
@@ -181,52 +211,31 @@ def calculate_ranking_GMM(prio, country_names_list):
     # Calc importance matrix
     mtx_list = []
     for l in prio:
-        mtx_list.append( make_importance_matrix(l) )
+        mtx_list.append(make_importance_matrix(l))
     imp_mtx = mean_from_experts(mtx_list)
-    # ==============================================================================
 
     def transpoze_mtx(mtx):
         return [[mtx[i][j] for i in range(len(mtx))] for j in range(len(mtx))]
 
-
-    def geometric_mean(mtx):
-        n = len(mtx)
-        roots = []
-        for row_id in range(n):
-            val = 1
-            for i in range(n):
-                val *= mtx[row_id][i]
-            roots.append(val**(1/n))
-        s = sum(roots)
-        return [roots[i]/s for i in range(n)]
-
-
-
-
-
-    
-    # ==============================================================================
-    attributes_weights = geometric_mean(transpoze_mtx( imp_mtx))
+    attributes_weights = geometric_mean(transpoze_mtx(imp_mtx))
     attributes_weights = swap_em(attributes_weights)
     # print(attributes_weights[0], "Population")
     # print(attributes_weights[1], "Average lifetime")
     # print(attributes_weights[2], "PKB")
     # print(attributes_weights[3], "Happiness")
 
-
-
     # Calculate all ranking values
-    weights = calc_weights_EVM(mapped_all) 
-    pre_ranking = multiply_by_attr_weights(weights, attributes_weights) # multiply all weights by their importance
+    weights = calc_weights(mapped_all)
+    pre_ranking = multiply_by_attr_weights(weights, attributes_weights)  # multiply all weights by their importance
 
     # Attach country names to values and sort by value
-    ranking = [[x, round(pre_ranking[i], 3)] for i, x in enumerate(countries_dict.keys())] 
+    ranking = [[x, round(pre_ranking[i], 3)] for i, x in enumerate(countries_dict.keys())]
     # Sort ranking table
-    ranking.sort(key=lambda x:x[1], reverse=True) 
+    ranking.sort(key=lambda x: x[1], reverse=True)
 
     # Make output list for GUI
     final = []
     for i, row in enumerate(ranking):
         # final.append([i+1, row[0]])
-        final.append(str(i+1) + ". " + row[0]) # format recieved by gui
+        final.append(str(i + 1) + ". " + row[0])  # format recieved by gui
     return final, weights

@@ -1,21 +1,22 @@
-
 import PySimpleGUI as sg
 from evm_ranking import calculate_ranking_EVM
 from gmm_ranking import calculate_ranking_GMM
+
 # Elements that are centered
 experts = 0
 column_countries = [
     [sg.Text("Countries:  ")],
-    [sg.Listbox( size=(25, 13), values=[
+    [sg.Listbox(size=(25, 13), values=[
         'Spain', 'Poland', 'Germany',
         'Italy', 'Switzerland', 'Norway',
-        'Greece','France','Russia',
+        'Greece', 'France', 'Russia',
         'England',
-        'Ireland','Turkey','Belarus'
-        ],key="LIST", select_mode= sg.LISTBOX_SELECT_MODE_MULTIPLE, enable_events=True, highlight_background_color='DarkBlue')],
+        'Ireland', 'Turkey', 'Belarus'
+    ], key="LIST", select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, enable_events=True,
+                highlight_background_color='DarkBlue')],
 ]
 column_priority = [
-    
+
     [sg.Text("On a scale of 0-10, compare the following pairs")],
     [sg.Text("Polulation - Average life length")],
     [sg.Text("Polulation - PKB")],
@@ -35,37 +36,38 @@ column_input = [
 ]
 column_ranking_EVM = [
     [sg.Text("Ranking EVM:  ")],
-    [sg.Listbox(size=(25, 13), values=[], key="RANKING_EVM",  no_scrollbar=True )],
+    [sg.Listbox(size=(25, 13), values=[], key="RANKING_EVM", no_scrollbar=True)],
 ]
 
 column_ranking_GMM = [
     [sg.Text("Ranking GMM:  ")],
-    [sg.Listbox(size=(25, 13), values=[], key="RANKING_GMM",  no_scrollbar=True )],
+    [sg.Listbox(size=(25, 13), values=[], key="RANKING_GMM", no_scrollbar=True)],
 ]
 
 layout = [
     [sg.Text("For example:")],
-    [sg.Text("If PKB is more important than Happiness type 0 but if Happiness is more important than PKB type 10.", justification='left')],
+    [sg.Text("If PKB is more important than Happiness type 0 but if Happiness is more important than PKB type 10.",
+             justification='left')],
     [sg.Text("If you type 5 it means that both are equally important.", justification='left')],
     [sg.Column(column_priority, justification='left'),
      sg.Column(column_input, justification="left"),
      sg.Column(column_countries, justification='left'),
      sg.Column(column_ranking_EVM, justification='left'),
      sg.Column(column_ranking_GMM, justification='left')
-    ],
+     ],
     [sg.Text("Add next expert"),
-    sg.Button("ADD", button_color='Red', mouseover_colors=('White', 'Green')),
-    sg.Text("Current experts added: 0", key="expcnt", text_color="Red")],
+     sg.Button("ADD", button_color='Red', mouseover_colors=('White', 'Green')),
+     sg.Text("Current experts added: 0", key="expcnt", text_color="Red")],
     [sg.Text("Clear experts"),
-    sg.Button("CLEAR", button_color='Red', mouseover_colors=('White', 'Green'))],
+     sg.Button("CLEAR", button_color='Red', mouseover_colors=('White', 'Green'))],
     [sg.Text("For active countries"),
-    sg.Button("Calculate rankings", button_color='Red', mouseover_colors=('White', 'Green'))],
-    [sg.Button("CLOSE", button_color='Red', mouseover_colors =('White','LightGreen'))]
+     sg.Button("Calculate rankings", button_color='Red', mouseover_colors=('White', 'Green'))],
+    [sg.Button("CLOSE", button_color='Red', mouseover_colors=('White', 'LightGreen'))]
 ]
 
 # Create the window
 sg.theme_global('DarkGreen')
-window = sg.Window("Ranking", layout, resizable=True, font= 'Any` 15')
+window = sg.Window("Ranking", layout, resizable=True, font='Any` 15')
 
 # List with Country data
 tab = []
@@ -107,9 +109,9 @@ while True:
             sg.Popup('You need to add at least one Country', keep_on_top=True)
             continue
         w = [0, 0]
-        ranking_evm, w[0]= calculate_ranking_EVM(prio, activeCountry)
+        ranking_evm, w[0] = calculate_ranking_EVM(prio, activeCountry)
         window['RANKING_EVM'].update(ranking_evm)
-        ranking_gmm, w[1]= calculate_ranking_GMM(prio, activeCountry)
+        ranking_gmm, w[1] = calculate_ranking_GMM(prio, activeCountry)
         window['RANKING_GMM'].update(ranking_gmm)
 
 window.close()
